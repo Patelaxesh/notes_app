@@ -4,18 +4,26 @@ import 'package:sqflite/sqflite.dart';
 
 class MyDb {
   Future<Database> database() async {
-    final db = openDatabase(
+    final db = await openDatabase(
       join(await getDatabasesPath(), 'notes_database.db'),
-      onCreate: (db, version) {
-        return db.execute(
+      version: 2,
+      onCreate: (db, version) async {
+        await db.execute(
           'CREATE TABLE notes('
           'id INTEGER PRIMARY KEY AUTOINCREMENT, '
           'title TEXT NOT NULL, '
-          'body TEXT NOT NULL'
+          'body TEXT NOT NULL, '
+          'category TEXT NOT NULL'
           ')',
         );
       },
-      version: 1,
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(
+            "ALTER TABLE notes ADD COLUMN category TEXT NOT NULL DEFAULT 'Personal'",
+          );
+        }
+      },
     );
 
     return db;
