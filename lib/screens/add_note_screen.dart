@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:notes/controllers/note_controller.dart';
+import 'package:notes/controllers/theme_controller.dart';
 import 'package:notes/models/note_model.dart';
 
 class AddNoteScreen extends StatefulWidget {
@@ -12,6 +13,7 @@ class AddNoteScreen extends StatefulWidget {
 
 class _AddNoteScreenState extends State<AddNoteScreen> {
   final NoteController controller = Get.find<NoteController>();
+  final ThemeController themeController = Get.find<ThemeController>();
 
   final formKey = GlobalKey<FormState>();
 
@@ -20,25 +22,17 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
 
   String selectedCategory = 'Personal';
 
-  final List<String> categories = [
-    'Work',
-    'Personal',
-    'Task',
-    'Ideas',
-  ];
+  final List<String> categories = ['Work', 'Personal', 'Task', 'Ideas'];
 
   @override
   void initState() {
     super.initState();
-
     titleController.addListener(_refresh);
     bodyController.addListener(_refresh);
   }
 
   void _refresh() {
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   @override
@@ -49,9 +43,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   }
 
   Future<void> saveNote() async {
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
+    if (!formKey.currentState!.validate()) return;
 
     final note = NoteModel(
       title: titleController.text.trim(),
@@ -72,8 +64,13 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
       appBar: AppBar(
         title: const Text(
           'Add Note',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
+        flexibleSpace: Obx(
+              () => Container(
+            decoration: BoxDecoration(
+              gradient: themeController.currentGradient,
+            ),
           ),
         ),
       ),
@@ -81,8 +78,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
             () => Form(
           key: formKey,
           child: ListView(
-            keyboardDismissBehavior:
-            ScrollViewKeyboardDismissBehavior.onDrag,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.all(20),
             children: [
               TextFormField(
@@ -93,47 +89,37 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                   labelText: 'Title',
                   hintText: 'Enter note title',
                   prefixIcon: const Icon(Icons.title_outlined),
-                  counterText:
-                  '${titleController.text.length}/100',
+                  counterText: '${titleController.text.length}/100',
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Title is required';
                   }
-
                   return null;
                 },
               ),
-
               const SizedBox(height: 16),
-
               DropdownButtonFormField<String>(
                 value: selectedCategory,
                 decoration: const InputDecoration(
                   labelText: 'Category',
-                  prefixIcon: Icon(
-                    Icons.category_outlined,
-                  ),
+                  prefixIcon: Icon(Icons.category_outlined),
                 ),
                 items: categories.map((category) {
                   return DropdownMenuItem<String>(
                     value: category,
                     child: Text(category),
+
                   );
                 }).toList(),
                 onChanged: controller.isSaving.value
                     ? null
                     : (value) {
                   if (value == null) return;
-
-                  setState(() {
-                    selectedCategory = value;
-                  });
+                  setState(() => selectedCategory = value);
                 },
               ),
-
               const SizedBox(height: 16),
-
               TextFormField(
                 controller: bodyController,
                 maxLines: 9,
@@ -146,35 +132,43 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                     child: Icon(Icons.notes_outlined),
                   ),
                   alignLabelWithHint: true,
-                  counterText:
-                  '${bodyController.text.length}/5000',
+                  counterText: '${bodyController.text.length}/5000',
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Note is required';
                   }
-
                   return null;
                 },
               ),
-
-              const SizedBox(height: 20),
-
-              SizedBox(
-                height: 52,
+              const SizedBox(height: 24),
+              Container(
+                height: 54,
+                decoration: BoxDecoration(
+                  gradient: themeController.currentGradient,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: themeController.currentGradient.colors.first
+                          .withOpacity(0.35),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
                     foregroundColor: Colors.white,
                   ),
-                  onPressed:
-                  controller.isSaving.value ? null : saveNote,
+                  onPressed: controller.isSaving.value ? null : saveNote,
                   child: controller.isSaving.value
                       ? const SizedBox(
                     height: 22,
                     width: 22,
                     child: CircularProgressIndicator(
-                      strokeWidth: 2,
+                      strokeWidth: 2.2,
                       color: Colors.white,
                     ),
                   )
@@ -182,6 +176,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                     'Save Note',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
+                      fontSize: 16,
                     ),
                   ),
                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:notes/controllers/note_controller.dart';
+import 'package:notes/controllers/theme_controller.dart';
 import 'package:notes/models/note_model.dart';
 
 class UpdateNoteScreen extends StatefulWidget {
@@ -12,13 +13,12 @@ class UpdateNoteScreen extends StatefulWidget {
   });
 
   @override
-  State<UpdateNoteScreen> createState() =>
-      _UpdateNoteScreenState();
+  State<UpdateNoteScreen> createState() => _UpdateNoteScreenState();
 }
 
 class _UpdateNoteScreenState extends State<UpdateNoteScreen> {
-  final NoteController controller =
-  Get.find<NoteController>();
+  final NoteController controller = Get.find<NoteController>();
+  final ThemeController themeController = Get.find<ThemeController>();
 
   final formKey = GlobalKey<FormState>();
 
@@ -27,27 +27,16 @@ class _UpdateNoteScreenState extends State<UpdateNoteScreen> {
 
   late String selectedCategory;
 
-  final List<String> categories = [
-    'Work',
-    'Personal',
-    'Task',
-    'Ideas',
-  ];
+  final List<String> categories = ['Work', 'Personal', 'Task', 'Ideas'];
 
   @override
   void initState() {
     super.initState();
 
-    titleController = TextEditingController(
-      text: widget.note.title,
-    );
+    titleController = TextEditingController(text: widget.note.title);
+    bodyController = TextEditingController(text: widget.note.body);
 
-    bodyController = TextEditingController(
-      text: widget.note.body,
-    );
-
-    selectedCategory =
-    categories.contains(widget.note.category)
+    selectedCategory = categories.contains(widget.note.category)
         ? widget.note.category
         : 'Personal';
 
@@ -56,9 +45,7 @@ class _UpdateNoteScreenState extends State<UpdateNoteScreen> {
   }
 
   void _refresh() {
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   @override
@@ -69,9 +56,7 @@ class _UpdateNoteScreenState extends State<UpdateNoteScreen> {
   }
 
   Future<void> updateNote() async {
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
+    if (!formKey.currentState!.validate()) return;
 
     final note = NoteModel(
       id: widget.note.id,
@@ -91,14 +76,10 @@ class _UpdateNoteScreenState extends State<UpdateNoteScreen> {
     final shouldDelete = await Get.dialog<bool>(
       AlertDialog(
         title: const Text('Delete note?'),
-        content: const Text(
-          'Are you sure you want to delete this note?',
-        ),
+        content: const Text('Are you sure you want to delete this note?'),
         actions: [
           TextButton(
-            onPressed: () {
-              Get.back(result: false);
-            },
+            onPressed: () => Get.back(result: false),
             child: const Text('Cancel'),
           ),
           FilledButton(
@@ -106,18 +87,14 @@ class _UpdateNoteScreenState extends State<UpdateNoteScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            onPressed: () {
-              Get.back(result: true);
-            },
+            onPressed: () => Get.back(result: true),
             child: const Text('Delete'),
           ),
         ],
       ),
     );
 
-    if (shouldDelete != true) {
-      return;
-    }
+    if (shouldDelete != true) return;
 
     final success = await controller.deleteNote(
       widget.note,
@@ -135,17 +112,20 @@ class _UpdateNoteScreenState extends State<UpdateNoteScreen> {
       appBar: AppBar(
         title: const Text(
           'Edit Note',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
+        flexibleSpace: Obx(
+              () => Container(
+            decoration: BoxDecoration(
+              gradient: themeController.currentGradient,
+            ),
           ),
         ),
         actions: [
           IconButton(
             tooltip: 'Delete note',
             onPressed: deleteNote,
-            icon: const Icon(
-              Icons.delete_outline,
-            ),
+            icon: const Icon(Icons.delete_outline_rounded),
           ),
         ],
       ),
@@ -153,8 +133,7 @@ class _UpdateNoteScreenState extends State<UpdateNoteScreen> {
             () => Form(
           key: formKey,
           child: ListView(
-            keyboardDismissBehavior:
-            ScrollViewKeyboardDismissBehavior.onDrag,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.all(20),
             children: [
               TextFormField(
@@ -164,30 +143,22 @@ class _UpdateNoteScreenState extends State<UpdateNoteScreen> {
                 decoration: InputDecoration(
                   labelText: 'Title',
                   hintText: 'Enter note title',
-                  prefixIcon: const Icon(
-                    Icons.title_outlined,
-                  ),
-                  counterText:
-                  '${titleController.text.length}/100',
+                  prefixIcon: const Icon(Icons.title_outlined),
+                  counterText: '${titleController.text.length}/100',
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Title is required';
                   }
-
                   return null;
                 },
               ),
-
               const SizedBox(height: 16),
-
               DropdownButtonFormField<String>(
                 value: selectedCategory,
                 decoration: const InputDecoration(
                   labelText: 'Category',
-                  prefixIcon: Icon(
-                    Icons.category_outlined,
-                  ),
+                  prefixIcon: Icon(Icons.category_outlined),
                 ),
                 items: categories.map((category) {
                   return DropdownMenuItem<String>(
@@ -199,15 +170,10 @@ class _UpdateNoteScreenState extends State<UpdateNoteScreen> {
                     ? null
                     : (value) {
                   if (value == null) return;
-
-                  setState(() {
-                    selectedCategory = value;
-                  });
+                  setState(() => selectedCategory = value);
                 },
               ),
-
               const SizedBox(height: 16),
-
               TextFormField(
                 controller: bodyController,
                 maxLines: 9,
@@ -217,42 +183,46 @@ class _UpdateNoteScreenState extends State<UpdateNoteScreen> {
                   hintText: 'Write your note...',
                   prefixIcon: const Padding(
                     padding: EdgeInsets.only(bottom: 140),
-                    child: Icon(
-                      Icons.notes_outlined,
-                    ),
+                    child: Icon(Icons.notes_outlined),
                   ),
                   alignLabelWithHint: true,
-                  counterText:
-                  '${bodyController.text.length}/5000',
+                  counterText: '${bodyController.text.length}/5000',
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Note is required';
                   }
-
                   return null;
                 },
               ),
-
-              const SizedBox(height: 20),
-
-              SizedBox(
-                height: 52,
+              const SizedBox(height: 24),
+              Container(
+                height: 54,
+                decoration: BoxDecoration(
+                  gradient: themeController.currentGradient,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: themeController.currentGradient.colors.first
+                          .withOpacity(0.35),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
                     foregroundColor: Colors.white,
                   ),
-                  onPressed:
-                  controller.isSaving.value
-                      ? null
-                      : updateNote,
+                  onPressed: controller.isSaving.value ? null : updateNote,
                   child: controller.isSaving.value
                       ? const SizedBox(
                     height: 22,
                     width: 22,
                     child: CircularProgressIndicator(
-                      strokeWidth: 2,
+                      strokeWidth: 2.2,
                       color: Colors.white,
                     ),
                   )
@@ -260,6 +230,7 @@ class _UpdateNoteScreenState extends State<UpdateNoteScreen> {
                     'Update Note',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
+                      fontSize: 16,
                     ),
                   ),
                 ),

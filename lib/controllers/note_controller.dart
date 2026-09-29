@@ -106,23 +106,60 @@ class NoteController extends GetxController {
   }) async {
     if (showConfirmation) {
       final bool? shouldDelete = await Get.dialog<bool>(
-        AlertDialog(
-          title: const Text('Delete note?'),
-          content: const Text('Are you sure you want to delete this note?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back(result: false);
-              },
-              child: const Text('Cancel'),
+        Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Delete note?',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                ),
+
+                const SizedBox(height: 10),
+
+                const Text(
+                  'Are you sure you want to delete this note?',
+                  style: TextStyle(fontSize: 15),
+                ),
+
+                const SizedBox(height: 24),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () {
+                          Get.back(result: false);
+                        },
+                        child: const Text('Cancel'),
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () {
+                          Get.back(result: true);
+                        },
+                        child: const Text('Delete'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            FilledButton(
-              onPressed: () {
-                Get.back(result: true);
-              },
-              child: const Text('Delete'),
-            ),
-          ],
+          ),
         ),
       );
 
